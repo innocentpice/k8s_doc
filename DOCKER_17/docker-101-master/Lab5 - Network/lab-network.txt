@@ -1,0 +1,61 @@
+=================================================
+Network Lab load balance
+=================================================
+    - List networks.
+$ docker network ls
+
+    - Create a network "private" bridge.
+$ docker network create --driver bridge --subnet=192.168.101.0/24 --ip-range=192.168.101.128/25 --gateway=192.168.101.48 private 
+
+    - Run Containers.
+$ docker run -d --net private --ip 192.168.101.80 --name proxy wearedocker/proxy 
+$ docker run -d --net private --net-alias site1 --ip 192.168.101.128 --name web1 wearedocker/nginx:web1
+$ docker run -d --net private --net-alias site2 --ip 192.168.101.129 --name web2 wearedocker/nginx:web2
+
+    - Curl IP.
+$ curl http://192.168.101.80/website 
+
+
+
+=================================================
+Network Lab
+=================================================
+-------------------------------------------------
+Lab preparing
+-------------------------------------------------
+    - Share folder to docker server.
+    1. stop docker-machine by using command.
+    docker-machine stop dockerlab
+    2. Create share folder on Host.
+    3. Copy file from lab network folder to share folder.
+    4. Open Virtual Box and share host's folder.
+    5. start docker-machine by using command.
+    docker-machine start dockerlab
+    6. Connect to docker server.
+    docker-machine ssh dockerlab
+    or
+    PuTTY
+
+-------------------------------------------------
+Start Lab
+-------------------------------------------------
+    - Create a network "public" bridge.
+$ docker network create --driver bridge --subnet=192.168.100.0/24 --ip-range=192.168.100.128/25 --gateway=192.168.100.84 public
+
+    - Connect container to Network
+$ docker network connect --ip 192.168.100.80 public proxy  
+
+    - Copy file nginx.conf to proxy.
+$ docker cp ./nginx.conf proxy:/etc/nginx/nginx.conf
+
+    - Retart proxy container.
+$ docker restart proxy
+
+    - Curl IP.
+$ curl http://192.168.101.80/website 
+$ curl http://192.168.100.80/website 
+
+    - Remove container and network.
+$ docker stop web1 web2 proxy
+$ docker rm web1 web2 proxy
+$ docker network rm private public

@@ -1,0 +1,247 @@
+=================================================
+Preparing Lab Swarm
+=================================================
+-------------------------------------------------
+at Host
+-------------------------------------------------
+    - Create virtualtoolsbox for manager, worker1 and worker2 node
+$ docker-machine create --driver=virtualbox --virtualbox-memory=600 mng       
+$ docker-machine create --driver=virtualbox --virtualbox-memory=600 work1     
+$ docker-machine create --driver=virtualbox --virtualbox-memory=600 work2     
+
+
+
+=================================================
+Swarm Cluster Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create manager node
+$ docker swarm init --addvirtise-addr 192.168.99.100
+
+////// Output
+Swarm initialized: current node (otmt5xhed9rm88tc60wdlli16) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-511i5gohjldvp4v1sz2w7qpt27ps0ah7bq39qwp5mcwby0xkya-935dctgffpspcjza0missm2jz 192.168.99.100:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+//////
+
+-------------------------------------------------
+at Worker1 and Worker2 Node
+-------------------------------------------------
+    - Join woker node
+$ docker swarm join --token SWMTKN-1-32fvxu3gsb8vgzlj5fvdboo4fr96h2y1q74qpgxve5mtjlel7t-0nk4nuliteye1ma51csr8badm 192.168.99.100:2377 
+
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - List node of Swarm
+$ docker node ls
+
+
+
+=================================================
+Load Balance Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create service hello on cluster
+$ docker service create --publish 8080:8080 --name hello wearedocker/goapp    
+
+    - List of service hello on cluster
+$ docker service ps hello                                                     
+$ curl localhost:8080         
+
+    - Scale up/down service hello
+$ docker service scale hello=3                                                
+$ docker service ps hello
+$ curl localhost:8080
+$ docker service rm hello
+
+
+
+=================================================
+Service Update and Rollback Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create service go form image wearedocker/goapp on cluster
+$ docker service create -d --replicas 3 -p 8080:8080 --name go wearedocker/goapp
+$ docker service ps go
+$ curl localhost:8080
+
+    - Update service go to newest image version (wearedocker/goapp:v2) on cluster
+$ docker service update -d --image wearedocker/goapp:v2 go
+$ docker service ps go
+$ curl localhost:8080
+
+    - Set task service history
+$ docker swarm update --task-history-limit 2
+
+    - Rollback service go to older image version on cluster
+$ docker service rollback go
+$ docker service ps go
+$ curl localhost:8080
+
+    - Remove service go
+$ docker service rm go
+
+
+
+=================================================
+Node Constraint Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+$ docker node ls
+$ docker service create --constraint 'node.hostname==work1' --name web --replicas 2 -p 80:80 wearedocker/goapp
+$ docker service ps web
+$ docker service rm web
+
+
+
+=================================================
+Node Label Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Add label on Worker node 1
+$ docker node update --label-add 'zone=tester' work1                          
+
+    - Add label on Worker node 2
+$ docker node update --label-add 'zone=tester' work2                          
+$ docker node inspect work1
+$ docker node inspect work2
+
+    - Create service on zone tester
+$ docker service create --constraint 'node.labels.zone==tester' --name web --replicas 2 -p 8080:8080 wearedocker/goapp            
+
+    - List service web on cluster
+$ docker service ps web                                                       
+$ docker service rm web
+
+
+
+=================================================
+Spread Service by Label Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create label on Manager node
+$ docker node update --label-add 'zone=ops' mng
+
+    - Create service and spread by "zone" label
+$ docker service create --placement-pref 'spread=node.labels.zone' --name web --replicas=10 wearedocker/goapp         
+$ docker service ps web
+$ docker service rm web
+
+
+
+=================================================
+Overlay Networks Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create Overlay network
+$ docker network create --driver overlay --subnet=192.168.100.0/24 nwswarm              
+$ docker service create --name web1 -p 8080:8080 wearedocker/goapp
+$ docker service create --name web2 --network nwswarm -p 8888:8080 wearedocker/goapp
+
+
+
+=================================================
+HA Manage Role in The Swarm Lab (Add/Remove Manager role)
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Update manager role to Worker1 node
+$ docker node update --role manager work1             
+$ docker node ls
+
+    - Shutdown Manager node
+$ sudo shutdown -h now            
+
+-------------------------------------------------
+at Woker 1 Node
+-------------------------------------------------
+$ docker node ls
+
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Update worker role to Worker1 node
+$ docker node update --role worker work1              
+$ docker node ls
+
+
+
+=================================================
+Swarm Stack Lab
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Create file docker compose
+
+////// docker-compose.yml
+version: '3.7'
+services:
+  balanceweb:
+    image: wearedocker/goapp
+    ports: 
+    - "8080:8080"
+//////
+
+    - Deploy Docker Compose file
+$ docker stack deploy -c docker-compose.yml stackgoapp
+
+    - List Stack 
+$ docker stack ls
+
+    - List the tasks in the Stack
+$ docker stack ps stackgoapp
+
+    - Scale up service in stack 
+$ docker service scale stackgoapp_balanceweb=3
+$ docker service ps stackgoapp_balanceweb
+$ curl localhost:8080
+
+    - Remove swarm Stack
+$ docker stack rm stackgoapp
+
+
+
+=================================================
+Remove Node of The Swarm Cluster
+=================================================
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - Update Availability Worker 2 to drain
+$ docker node update --availability drain work2
+
+-------------------------------------------------
+at Worker 2 Node
+-------------------------------------------------
+    - Leave Work2 from Swarm Cluster
+$ docker swarm leave
+
+-------------------------------------------------
+at Manager Node
+-------------------------------------------------
+    - List node of Swarm Cluster
+$ docker node ls
+
+    - When Worker 2 node status is down. Remove node from Swarm Cluster
+$ docker node rm work2

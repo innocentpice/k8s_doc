@@ -1,0 +1,8 @@
+FROM alpine     
+RUN apk update && \          
+    apk add --no-cache python3   
+RUN mkdir -p /tmp/run    
+WORKDIR /tmp/run                        
+COPY name.py . 
+ENTRYPOINT ["/bin/sh","-c"] 
+CMD ["python3 name.py"] 

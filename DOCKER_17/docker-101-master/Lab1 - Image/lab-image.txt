@@ -1,0 +1,11 @@
+=================================================
+Image Lab
+=================================================
+    - Download image from registry
+$ docker pull nginx
+
+    - Show images list.
+$ docker image ls
+
+    - Remove images.
+$ docker image rm nginx

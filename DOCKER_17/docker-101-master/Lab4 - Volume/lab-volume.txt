@@ -1,0 +1,63 @@
+=================================================
+Volume Lab
+=================================================
+    - Create a volume.
+$ docker volume create volumelab
+
+    - Run containes and mount a volume.
+$ docker run -d -p 80:80 --name vol1 -v volumelab:/usr/share/nginx/html nginx:html
+$ docker run -d -p 88:80 --name vol2 -v volumelab:/usr/share/nginx/html nginx:html
+
+    - Open URL.
+http://192.168.99.100:80
+http://192.168.99.100:88
+
+    - Executes command in a containe.
+$ docker exec -it vol1 sh
+
+    - Edit html file.
+$ vi /usr/share/nginx/html/index.html
+
+    - Open URL.
+http://192.168.99.100:80
+http://192.168.99.100:88
+
+    - Remove containes and Volume.
+$ docker stop vol1 vol2
+$ docker rm vol1 vol2
+$ docker volume rm volumelab
+
+
+
+=================================================
+Bind Lab
+=================================================
+-------------------------------------------------
+Lab preparing
+-------------------------------------------------
+- Share folder to docker server.
+    1. stop docker-machine by using command.
+    docker-machine stop dockerlab
+    2. Create share folder on Host.
+    3. Open Virtual Box and share host's folder.
+    4. start docker-machine by using command.
+    docker-machine start dockerlab
+    5. Connect to docker server.
+    docker-machine ssh dockerlab
+    or
+    PuTTY
+
+-------------------------------------------------
+Start Lab
+-------------------------------------------------
+    - Go to Share director
+    - Create file html
+    - Run containes and mount a volume tpe bind.
+$ docker run -d -p 80:80 --name bind1 -v /share:/usr/share/nginx/html nginx:html
+
+    - Open URL.
+http://192.168.99.100:80
+
+    - Remove containes.
+$ docker stop bind1
+$ docker rm bind1

@@ -1,0 +1,39 @@
+=================================================
+Compose Lab
+=================================================
+-------------------------------------------------
+Lab preparing
+-------------------------------------------------
+    - Download Docker Compose.
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+    - Apply executable permissions to the binary.
+$ sudo chmod +x /usr/local/bin/docker-compose
+
+-------------------------------------------------
+Start Lab
+-------------------------------------------------
+    - Create docker compose file.
+$ vi docker-compose.yml
+
+    - Docker Compose file.
+////// Dockerfile
+version: '3.7'
+services:
+  node:
+    container_name: node
+    build: .
+    ports:
+      - "8080:8080"
+//////
+
+    - Run docker compose file.
+$ docker-compose up -d
+
+    - Open browser
+http://192.168.99.100:8080
+
+    - Stop docker compose.
+$ docker-compose down
+
+

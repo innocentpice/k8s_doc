@@ -1,0 +1,8 @@
+FROM alpine     
+RUN apk update && \          
+    apk add --no-cache nodejs-current
+RUN mkdir -p /tmp/run    
+WORKDIR /tmp/run                        
+COPY server.js . 
+ENTRYPOINT ["/bin/sh","-c"] 
+CMD ["node server.js"] 

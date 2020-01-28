@@ -1,0 +1,52 @@
+=================================================
+Prepareling
+=================================================
+-------------------------------------------------
+Windows os (Pro edition)
+-------------------------------------------------
+    1. Enable Virtualization Technology (vt-x/AMD-v) on BIOS.
+    2. Run command at PowerShell (run as administrator).
+        > Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+    3. Download and Install docker toolbox.
+        https://download.docker.com/win/stable/DockerToolbox.exe
+    4. (Optional) Enable Windows Subsystem For Linux (WSL) :: Windowns 10 version 1703
+        Go to: Control Panel\Programs\Programs and Features
+        Click: Turn Windows feature on or off
+        Check box: Windows Subsystem for Linux
+    5. Open Command Prompt
+    6. Verify your installation.
+        > docker version
+    7. Verify your installation.
+        > docker-machine version
+    8. Create virtual machine for Docker server.
+        > docker-machine create labdocker
+    9. Check state and IP Docker servers.
+        > docker-machine ls
+    10. Connect to Docker server.
+        - Using PuTTY for who didn't do task no.4
+            IP: From task no.9
+            User: docker
+            Password: tcuser
+        - ssh connect to Docker server.
+            > docker-machine ssh labdocker
+    11. Run test Docker.
+        $ docker run hello-world
+
+-------------------------------------------------
+Mac os
+-------------------------------------------------
+    1. Download and Install docker toolbox.
+        https://download.docker.com/mac/stable/DockerToolbox.pkg
+    2. Open terminal.
+    3. Verify your installation.
+        $ docker version
+    4. Verify your installation.
+        $ docker-machine version
+    5. Create virtual machine for Docker server.
+        $ docker-machine create labdocker
+    6. Check state and IP Docker servers.
+        $ docker-machine ls
+    7. Connect to Docker server.
+        $ docker-machine ssh labdocker
+    8. Run test Docker.
+        $ docker run hello-world

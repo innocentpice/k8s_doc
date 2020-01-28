@@ -1,0 +1,36 @@
+=================================================
+Dockerfile Lab
+=================================================
+    - Create Dockerfile.
+$ vi dockerfile
+////// Dockerfile
+FROM alpine     
+RUN apk update && \          
+    apk add --no-cache nodejs-current
+RUN mkdir -p /tmp/run    
+WORKDIR /tmp/run                        
+COPY server.js . 
+ENTRYPOINT ["/bin/sh","-c"] 
+CMD ["node server.js"] 
+//////
+
+    - Create nodejs file.
+$ vi server.js
+////// nodejs
+var http = require('http');
+
+http.createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.write('Hello\n');
+    res.end();
+}).listen(8080);
+//////
+
+    - Build Image from Dockerfile.
+$ docker build -t webserver:node .
+
+    - Run container.
+$ docker run --rm webserver:node
+
+    - Curl IP.
+$ curl http://192.168.99.100:8080

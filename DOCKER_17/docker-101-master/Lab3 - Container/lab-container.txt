@@ -1,0 +1,17 @@
+=================================================
+Contrainer Lab
+=================================================
+    - Run a contrainer.
+$ docker run -d -p 80:80 --name nginx nginx:1.15.5-alpine
+
+    - List contrainer.
+$ docker ps
+
+    - Executes command in a container.
+$ docker exec -it nginx sh
+
+    - Edit html file.
+$ vi /usr/share/nginx/html/index.html
+
+    - Commit a container's changes.
+$ docker commit nginx nginx:html

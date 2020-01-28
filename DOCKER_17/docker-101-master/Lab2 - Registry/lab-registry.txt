@@ -1,0 +1,26 @@
+=================================================
+Registry Lab
+=================================================
+-------------------------------------------------
+Lab preparing
+-------------------------------------------------
+    - Register Docker hub at http://hub.docker.com 
+
+-------------------------------------------------
+Start Lab
+-------------------------------------------------
+    - Create repository on Docker hub
+Repository name: nginx
+
+    ** <username> is Your account name from Docker hub.
+    - Create tag image
+$ docker tag nginx <username>/nginx:lab2
+
+    - Log in to a registry.
+$ docker login -u <username>
+
+    - Push image to a registry.
+$ docker push <username>/nginx:lab2
+
+    - Log out
+$ docker logout
